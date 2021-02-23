@@ -69,10 +69,10 @@
 		return grid_;
 
 	}
-	var random_walk = function(grid, start_pos, walk_length) {
+	var random_walk = function(grid, start_pos) {
 		var walk = [];
 
-		while(walk_length > 0) {
+		while(true) {
 			list = [];
 			if(start_pos[0]-1 >= 0)
 			{
@@ -93,7 +93,12 @@
 
 			walk.push(start_pos);
 			start_pos = list[Math.floor(Math.random()*list.length)];
-			walk_length -= 1;
+
+			id = start_pos[0] * 30 + start_pos[1];
+			if($('#'+id).hasClass("end")) {
+				break;
+			}
+			
 		}
 		var intId = setInterval(function() {
 
@@ -153,7 +158,7 @@
 
 	g = grid(20, 30, 35, [5,8], [19,12]);
 	$('body').click(function() {
-		random_walk(g, [5,9], 6000);
+		random_walk(g, [5,9]);
 	})
 </script>
 </html>
