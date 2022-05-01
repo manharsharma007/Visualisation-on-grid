@@ -4,6 +4,16 @@
 	<title></title>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 	<style type="text/css">
+		.buttons {
+			position: absolute;
+			right: 0;
+		}.buttons button{
+			border: 0;
+			background: #c12;
+			color: #fff;
+			padding: 4px 10px;
+			border-radius: 4px;
+		}
 		.start {
 			background: #affaaf;
 		}.visited {
@@ -15,6 +25,13 @@
 		}
 		.path {
 			background: #fa3b4c;
+		}
+		.anchor{
+			background: #000 !important;
+			color: #fff !important;
+		}
+		.anchor label{
+			color: #fff !important;
 		}
 		visited {
 			position: absolute;
@@ -41,17 +58,24 @@
 </head>
 <body>
 <div id="container">
-	
+	<div class="col buttons">
+		<button id="Random Walk" onclick="random_walk(g, [5,9])">Random Walk</button>
+		<button id="Shortest Path" onclick="bfs(g, [5,9])">Shortest Path</button>
+	</div>
 </div>
 </body>
 <script>
+	let start = [5,9];
+	let anchors = [];
+	let stop = false;
+
 	let grid = function create_grid(rows, columns, cell_width, start, stop) {
 		grid_ = []
 		id = 1;
 		for(i = 0; i < rows; i++) {
 			for (j = 0; j < columns; j++) {
 
-				node = $('<div class="node" id="'+id+'"></div>');
+				node = $('<div class="node" id="'+id+'" data-loc="'+i+'|'+j+'"></div>');
 				node.append('<label>'+id+'<label>');
 				node.css({'position':'absolute', 'left':j * cell_width + 'px', 'top': i*cell_width + 'px', 'border' : '#aaa solid 1px', 'width' : cell_width+'px', 'height' : cell_width+'px'});
 				if(start[0] == i && start[1] == j) {
@@ -59,6 +83,7 @@
 				}if(stop[0] == i && stop[1] == j) {
 					node.addClass('end');
 				}
+
 				grid_.push(node);
 				$('#container').append(node);
 
@@ -66,31 +91,51 @@
 			}
 		}
 
+		$('.node').on('click', function() {
+			loc = $(this).attr('data-loc');
+			if(anchors.includes(loc)) {
+				$(this).removeClass('anchor');
+				const index = anchors.indexOf(loc);
+				if (index > -1) {
+				  anchors.splice(index, 1);
+				}
+			}
+			else {
+				anchors.push(loc);
+				$(this).addClass('anchor');
+			}
+		});
+
 		return grid_;
 
 	}
 	var random_walk = function(grid, start_pos) {
 		var walk = [];
 
-		while(true) {
+		while(!stop) {
 			list = [];
-			if(start_pos[0]-1 >= 0)
+			if(start_pos[0]-1 >= 0 && anchors.includes((start_pos[0]-1)+'|'+start_pos[1]) == false)
 			{
 				list.push([start_pos[0] - 1, start_pos[1]]);
 			}
-			if(start_pos[1] - 1 > 0)
+			if(start_pos[1] - 1 > 0 && anchors.includes(start_pos[0]+'|'+(start_pos[1]-1)) == false)
 			{
 				list.push([start_pos[0], start_pos[1] - 1]);
 			}
-			if(start_pos[0] + 1 < 20)
+			if(start_pos[0] + 1 < 20 && anchors.includes((start_pos[0]+1)+'|'+start_pos[1]) == false)
 			{
 				list.push([start_pos[0] + 1, start_pos[1]]);
 			}
-			if(start_pos[1] + 1 <= 30)
+			if(start_pos[1] + 1 <= 30 && anchors.includes(start_pos[0]+'|'+(start_pos[1]+1)) == false)
 			{
 				list.push([start_pos[0], start_pos[1] + 1]);
 			}
 
+			if(list.length <= 0) {
+				alert('No position left');
+				clearInterval(intId);
+				break;
+			}
 			walk.push(start_pos);
 			start_pos = list[Math.floor(Math.random()*list.length)];
 
@@ -112,7 +157,7 @@
 			$('#'+id).append('<visited></visited>');
 		}, 40);
 	}
-	var bfs = function(grid, start_pos, stop) {
+	var bfs = function(grid, start_pos) {
 		queue = [start_pos];
 		visited = {};
 		visited[start_pos] = true;
@@ -122,24 +167,32 @@
 			if(queue.length <= 0) {
 				clearInterval(intId);
 			}
-			if(visited.length > 500 || (start_pos[0] == stop[0] && start_pos[1] == stop[1])) {
-				clearInterval(intId);
-				return;
-			}
-
-			console.log(visited);
 
 			start_pos = queue.shift();
 
 			ud_ = start_pos[0] * 30 + start_pos[1];
 			trav.push(ud_);
 
+			if(visited.length > 500 || $('#'+ud_).hasClass("end")) {
+				clearInterval(intId);
+				return;
+			}
+
 
 			if(start_pos) {
-				neighbours = [[start_pos[0] - 1, start_pos[1]],
-				[start_pos[0] + 1, start_pos[1]],
-				[start_pos[0], start_pos[1] - 1],
-				[start_pos[0], start_pos[1] + 1]];
+				neighbours = [];
+				if(anchors.includes(start_pos[0]-1+'|'+start_pos[1]) == false) {
+					neighbours.push([start_pos[0] - 1, start_pos[1]]);
+				}
+				if(anchors.includes(start_pos[0]+1+'|'+start_pos[1]) == false) {
+					neighbours.push([start_pos[0] + 1, start_pos[1]]);
+				}
+				if(anchors.includes(start_pos[0]+'|'+start_pos[1]-1) == false) {
+					neighbours.push([start_pos[0], start_pos[1]-1]);
+				}
+				if(anchors.includes(start_pos[0]+'|'+start_pos[1]+1) == false) {
+					neighbours.push([start_pos[0], start_pos[1]+1]);
+				}
 			}
 			
 			$.each(neighbours, function(k,v) {
@@ -157,8 +210,8 @@
 	}
 
 	g = grid(20, 30, 35, [5,8], [19,12]);
-	$('body').click(function() {
-		random_walk(g, [5,9]);
-	})
+	// $('body').click(function() {
+	// 	random_walk(g, [5,9]);
+	// })
 </script>
 </html>
