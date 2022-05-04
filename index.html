@@ -114,34 +114,37 @@
 
 		while(!stop) {
 			list = [];
-			if(start_pos[0]-1 >= 0 && anchors.includes((start_pos[0]-1)+'|'+start_pos[1]) == false)
+			if(start_pos[0]-1 >= 0)
 			{
 				list.push([start_pos[0] - 1, start_pos[1]]);
 			}
-			if(start_pos[1] - 1 > 0 && anchors.includes(start_pos[0]+'|'+(start_pos[1]-1)) == false)
+			if(start_pos[1] - 1 > 0)
 			{
 				list.push([start_pos[0], start_pos[1] - 1]);
 			}
-			if(start_pos[0] + 1 < 20 && anchors.includes((start_pos[0]+1)+'|'+start_pos[1]) == false)
+			if(start_pos[0] + 1 < 20)
 			{
 				list.push([start_pos[0] + 1, start_pos[1]]);
 			}
-			if(start_pos[1] + 1 <= 30 && anchors.includes(start_pos[0]+'|'+(start_pos[1]+1)) == false)
+			if(start_pos[1] + 1 <= 30)
 			{
 				list.push([start_pos[0], start_pos[1] + 1]);
 			}
 
+			list = list.filter(value => !anchors.includes(value[0] + '|' + value[1]))
 			if(list.length <= 0) {
 				alert('No position left');
 				clearInterval(intId);
+				stop = True
 				break;
 			}
-			walk.push(start_pos);
-			start_pos = list[Math.floor(Math.random()*list.length)];
-
-			id = start_pos[0] * 30 + start_pos[1];
-			if($('#'+id).hasClass("end")) {
-				break;
+			else {
+				walk.push(start_pos);
+				start_pos = list[Math.floor(Math.random()*list.length)];
+				id = start_pos[0] * 30 + start_pos[1];
+				if($('#'+id).hasClass("end")) {
+					break;
+				}
 			}
 			
 		}
@@ -181,19 +184,13 @@
 
 			if(start_pos) {
 				neighbours = [];
-				if(anchors.includes(start_pos[0]-1+'|'+start_pos[1]) == false) {
-					neighbours.push([start_pos[0] - 1, start_pos[1]]);
-				}
-				if(anchors.includes(start_pos[0]+1+'|'+start_pos[1]) == false) {
-					neighbours.push([start_pos[0] + 1, start_pos[1]]);
-				}
-				if(anchors.includes(start_pos[0]+'|'+start_pos[1]-1) == false) {
-					neighbours.push([start_pos[0], start_pos[1]-1]);
-				}
-				if(anchors.includes(start_pos[0]+'|'+start_pos[1]+1) == false) {
-					neighbours.push([start_pos[0], start_pos[1]+1]);
-				}
+				neighbours.push([start_pos[0] - 1, start_pos[1]]);
+				neighbours.push([start_pos[0] + 1, start_pos[1]]);
+				neighbours.push([start_pos[0], start_pos[1]-1]);
+				neighbours.push([start_pos[0], start_pos[1]+1]);
 			}
+
+			neighbours = neighbours.filter(value => !anchors.includes(value[0] + '|' + value[1]))
 			
 			$.each(neighbours, function(k,v) {
 				if(v[0] >= 0 && v[1] > 0 && v[0] < 20 && v[1] <= 30) {
@@ -210,8 +207,5 @@
 	}
 
 	g = grid(20, 30, 35, [5,8], [19,12]);
-	// $('body').click(function() {
-	// 	random_walk(g, [5,9]);
-	// })
 </script>
 </html>
