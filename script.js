@@ -51,7 +51,7 @@ let start = [5,9];
 			{
 				list.push([start_pos[0] - 1, start_pos[1]]);
 			}
-			if(start_pos[1] - 1 > 0)
+			if(start_pos[1] - 1 >= 0)
 			{
 				list.push([start_pos[0], start_pos[1] - 1]);
 			}
@@ -59,7 +59,7 @@ let start = [5,9];
 			{
 				list.push([start_pos[0] + 1, start_pos[1]]);
 			}
-			if(start_pos[1] + 1 <= 30)
+			if(start_pos[1] + 1 < 30)
 			{
 				list.push([start_pos[0], start_pos[1] + 1]);
 			}
